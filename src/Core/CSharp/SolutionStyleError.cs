@@ -219,6 +219,9 @@ namespace Ulearn.Core.CSharp
 		
 		[MessageTemplate("В блоке `if` всегда происходит выход из функции, поэтому `else` можно убрать.")]
 		RedundantElse01,
+		
+		[MessageTemplate("Возможно, код здесь похож на блок {0}")]
+		CodeDuplication01
 	}
 
 	[AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
