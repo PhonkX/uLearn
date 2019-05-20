@@ -33,8 +33,8 @@ namespace Ulearn.Core.CSharp.Validators
 		
 		private IEnumerable<SolutionStyleError> InspectClass(ClassDeclarationSyntax classDeclarationSyntax)
 		{
-			return InspectIfsInsideClass(classDeclarationSyntax);
-
+			return InspectIfsInsideClass(classDeclarationSyntax)
+				.Concat(InspectMethodsInsideClass(classDeclarationSyntax));
 		}
 
 		private IEnumerable<SolutionStyleError> InspectIfsInsideClass(ClassDeclarationSyntax classDeclarationSyntax)
@@ -70,7 +70,25 @@ namespace Ulearn.Core.CSharp.Validators
 			}
 		}
 
-		
+		private IEnumerable<SolutionStyleError> InspectMethodsInsideClass(ClassDeclarationSyntax classDeclarationSyntax)
+		{
+			var methodStatements = classDeclarationSyntax
+				.DescendantNodes()
+				.OfType<MethodDeclarationSyntax>()
+				.ToList();
+			foreach (var methodStatementSyntax1 in methodStatements)
+			{
+				foreach (var methodStatementSyntax2 in methodStatements)
+				{
+					if (methodStatementSyntax1 == methodStatementSyntax2)
+						continue;
+					var similarity = 1 - calculateDistance(methodStatementSyntax1, methodStatementSyntax2);
+					if (similarity > SimilarityThreshold)
+						yield return new SolutionStyleError(StyleErrorType.CodeDuplication01, methodStatementSyntax1, methodStatementSyntax2.GetLocation().GetLineSpan().StartLinePosition.Line);
+				}
+			}
+		}
+
 		private static void InitializeCalculateDistanceMethod()
         {
             try
