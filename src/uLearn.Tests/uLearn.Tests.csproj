@@ -380,8 +380,8 @@
     <Compile Include="CSharp\ArrayGetLengthValidation\TestData\Incorrect\GetLengthInWhileCycle.cs" />
     <Compile Include="CSharp\CodeDuplicationValidation\CodeDuplicationValidator_should.cs" />
     <Compile Include="CSharp\CodeDuplicationValidation\TestData\Correct\TotallyDifferentIfBlocks.cs" />
-    <Compile Include="CSharp\CodeDuplicationValidation\TestData\Incorrect\Correct1.cs" />
-    <Compile Include="CSharp\CodeDuplicationValidation\TestData\Incorrect\testdata.cs" />
+    <Compile Include="CSharp\CodeDuplicationValidation\TestData\Incorrect\SameIfBlocks.cs" />
+    <Compile Include="CSharp\CodeDuplicationValidation\TestData\Incorrect\SameCycles.cs" />
     <Compile Include="CSharp\ExcessLinesValidation\ExcessLinesValidator_Should.cs" />
     <Compile Include="CSharp\ExcessLinesValidation\TestData\Correct\ExcessLinesValidatorCases.cs" />
     <Compile Include="CSharp\ExcessLinesValidation\TestData\Incorrect\ExcessLinesValidatorCases.cs" />
