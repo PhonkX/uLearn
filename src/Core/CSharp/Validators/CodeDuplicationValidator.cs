@@ -33,7 +33,15 @@ namespace Ulearn.Core.CSharp.Validators
 		
 		private IEnumerable<SolutionStyleError> InspectClass(ClassDeclarationSyntax classDeclarationSyntax)
 		{
-			return InspectIfsInsideClass(classDeclarationSyntax)
+			// return InspectIfsInsideClass(classDeclarationSyntax)
+			// 	.Concat(InspectMethodsInsideClass(classDeclarationSyntax));
+			// return InspectMethodsInsideClass(classDeclarationSyntax);
+			return InspectSyntaxInsideClass<IfStatementSyntax>(classDeclarationSyntax)
+				//.Concat(InspectSyntaxInsideClass<MethodDeclarationSyntax>(classDeclarationSyntax))
+				.Concat(InspectSyntaxInsideClass<ForStatementSyntax>(classDeclarationSyntax))
+				.Concat(InspectSyntaxInsideClass<WhileStatementSyntax>(classDeclarationSyntax))
+				.Concat(InspectSyntaxInsideClass<DoStatementSyntax>(classDeclarationSyntax))
+				.Concat(InspectSyntaxInsideClass<ForEachStatementSyntax>(classDeclarationSyntax))
 				.Concat(InspectMethodsInsideClass(classDeclarationSyntax));
 		}
 
@@ -78,13 +86,71 @@ namespace Ulearn.Core.CSharp.Validators
 				.ToList();
 			foreach (var methodStatementSyntax1 in methodStatements)
 			{
+				var methodChildNodes = methodStatementSyntax1
+					.ChildNodes()
+					.ToList();
+				var blockSyntax = methodChildNodes
+					.OfType<BlockSyntax>()
+					.FirstOrDefault();
+				if (blockSyntax is null || blockSyntax.ChildNodes().Count() < 3)
+					continue;
+
+				var isMethodTest = methodChildNodes.Any(n => n is AttributeListSyntax && n.ToString().Contains("Test"));
+				if (isMethodTest)
+					continue;
+				
 				foreach (var methodStatementSyntax2 in methodStatements)
 				{
 					if (methodStatementSyntax1 == methodStatementSyntax2)
 						continue;
+					methodChildNodes = methodStatementSyntax2
+						.ChildNodes()
+						.ToList();
+					blockSyntax = methodChildNodes
+						.OfType<BlockSyntax>()
+						.FirstOrDefault();
+					if (blockSyntax is null || blockSyntax.ChildNodes().Count() < 3)
+						continue;
+					isMethodTest = methodChildNodes.Any(n => n is AttributeListSyntax && n.ToString().Contains("Test"));
+					if (isMethodTest)
+						continue;
+					
 					var similarity = 1 - calculateDistance(methodStatementSyntax1, methodStatementSyntax2);
 					if (similarity > SimilarityThreshold)
 						yield return new SolutionStyleError(StyleErrorType.CodeDuplication01, methodStatementSyntax1, methodStatementSyntax2.GetLocation().GetLineSpan().StartLinePosition.Line);
+				}
+			}
+		}
+		
+		private IEnumerable<SolutionStyleError> InspectSyntaxInsideClass<TSyntax>(ClassDeclarationSyntax classDeclarationSyntax) where TSyntax: SyntaxNode
+		{
+			var syntaxStatements = classDeclarationSyntax
+				.DescendantNodes()
+				.OfType<TSyntax>()
+				.ToList();
+			foreach (var statement1 in syntaxStatements)
+			{
+				var blockSyntax = statement1
+					.ChildNodes()
+					.OfType<BlockSyntax>()
+					.FirstOrDefault();
+				if (blockSyntax is null || blockSyntax.ChildNodes().Count() < 3)
+					continue;
+
+				foreach (var statement2 in syntaxStatements)
+				{
+					if (statement1 == statement2)
+						continue;
+					blockSyntax = statement2
+						.ChildNodes()
+						.OfType<BlockSyntax>()
+						.FirstOrDefault();
+					if (blockSyntax is null || blockSyntax.ChildNodes().Count() < 3)
+						continue;
+					
+					var similarity = 1 - calculateDistance(statement1, statement2);
+					if (similarity > SimilarityThreshold)
+						yield return new SolutionStyleError(StyleErrorType.CodeDuplication01, statement1, statement2.GetLocation().GetLineSpan().StartLinePosition.Line);
 				}
 			}
 		}
