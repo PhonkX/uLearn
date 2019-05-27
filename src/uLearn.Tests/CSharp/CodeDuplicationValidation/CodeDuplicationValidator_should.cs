@@ -9,7 +9,6 @@ using FluentAssertions;
 using NUnit.Framework;
 using Ulearn.Common.Extensions;
 using Ulearn.Core.CSharp.Validators;
-using uLearn.CSharp.Validators;
 
 namespace uLearn.CSharp.CodeDuplicationValidation
 {
